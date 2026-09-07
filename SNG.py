@@ -1,0 +1,87 @@
+import tkinter as tk
+from tkinter import ttk
+
+from datetime import datetime
+import random
+from ctypes import windll
+
+# Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
+windll.shcore.SetProcessDpiAwareness(1)
+r = tk.Tk()
+r.title("Smart Nursery Guardian")
+r.geometry("1500x1100")
+parameters = {"temperature": tk.StringVar(value="27.0 °C"),
+            "motion": tk.StringVar(value="0"),
+            "baby_state": tk.StringVar(value="Sleeping"),
+            "light": tk.StringVar(value="Bright"),
+            "gas": tk.StringVar(value="Safe"),
+            "fan": tk.StringVar(value="Half Speed"),
+            "servo": tk.StringVar(value="Stopped"),
+            "connection": tk.StringVar(value="Connected"),
+            "cry": tk.StringVar(value="No cry detected"),
+            "classification": tk.StringVar(value="—"),
+            "last_event": tk.StringVar(value="System started"),}
+
+status=ttk.Frame(r,padding=(25,5))
+status.pack(fill="x")
+style = ttk.Style()
+style.configure("Title.TLabel", font=("Segoe UI", 24, "bold"))
+style.configure("Subtitle.TLabel", font=("Segoe UI", 10))
+style.configure("Card.TFrame", relief="solid", borderwidth=1)
+style.configure("CardTitle.TLabel", font=("Segoe UI", 11, "bold"))
+style.configure("Value.TLabel", font=("Segoe UI", 20, "bold"))
+style.configure("Small.TLabel", font=("Segoe UI", 9))
+style.configure("Action.TButton", font=("Segoe UI", 10, "bold"), padding=8)
+connection=1 
+#connection=int(input()) # this is supposed to check if the chip is connected , somehow
+
+if connection == 0 :
+    parameters["connection"]=tk.StringVar(value="Not connected")
+ttk.Label(status, textvariable=parameters["connection"],font=("Segoe UI", 10, "bold")).pack(side="left", padx=5)
+ttk.Label(status, text=" | Serial: BlackPill",style="Small.TLabel").pack(side="left")
+ttk.Separator(r).pack(fill="x", padx=2, pady=8)
+content = ttk.Frame(r, padding=(22, 8))
+content.pack(fill="both", expand=False)
+left = ttk.Frame(content)
+left.pack( fill="both", expand=False, padx=(0, 10))
+ttk.Label(left, text="Live Monitoring",font=("Segoe UI", 16, "bold")).pack(anchor='center', pady=(0, 10))
+cards = ttk.Frame(left)
+cards.pack(fill="x")
+
+def make_card(parent, col, row, title, variable, subtitle):
+    card = ttk.Frame(parent, style="Card.TFrame", padding=14)
+    card.grid(row=row, column=col, sticky="nsew", padx=5, pady=5)
+    parent.columnconfigure(col, weight=1)
+    ttk.Label(card, text=title, style="CardTitle.TLabel").pack(anchor='center')
+    ttk.Label(card, textvariable=variable, style="Value.TLabel").pack(anchor='center', pady=(8, 2))
+    ttk.Label(card, text=subtitle, style="Small.TLabel").pack(anchor='center')
+temp = 0
+#temp = int(input())
+parameters["temperature"] = tk.StringVar(value=(str(temp)+".0 °C")) if (temp > 0) else parameters["temperature"] 
+mot = 0
+#mot = int(input())
+parameters["motion"] = tk.StringVar(value=str(mot)) if (mot > 0) else parameters["motion"]
+li = "0"
+#li = input()
+parameters["light"] = tk.StringVar(value=li) if (li != "0") else parameters["light"]
+g = "0"
+#g = input()
+parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
+#the chip should communicate with the GUI for all that info 
+make_card(cards, 0, 0, "Temperature", parameters["temperature"], "Thermistor")
+make_card(cards, 1, 0, "Motion", parameters["motion"], "PIR / 8 sec")
+make_card(cards, 0, 1, "Room Light", parameters["light"], "LDR")
+make_card(cards, 1, 1, "Gas / Smoke", parameters["gas"], "Gas sensor")
+state = ttk.LabelFrame(left, text="System State", padding=14)
+state.pack(fill="x", pady=12)
+rows = [
+            ("Baby state", "baby_state"),
+            ("Cry detection", "cry"),
+            ("ML classification", "classification"),
+            ("Cooling fan", "fan"),
+            ("Servo", "servo"),
+        ]
+for i, (label, key) in enumerate(rows):
+    ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
+    ttk.Label(state, textvariable=parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
+r.mainloop()
