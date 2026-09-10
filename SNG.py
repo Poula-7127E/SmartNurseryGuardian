@@ -86,7 +86,7 @@ for i, (label, key) in enumerate(rows):
     ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
     ttk.Label(state, textvariable=parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
 vidr = tk.Tk()
-vidr.title("Hungrykiddo")
+vidr.title("Hungry_kiddo")
 vidr.attributes('-fullscreen', True)
 vidr.bind('<Escape>', lambda e: vidr.attributes('-fullscreen', False))
 vidframe = tk.Frame(vidr)
@@ -94,11 +94,18 @@ vidframe.pack(fill=tk.BOTH, expand=True)
 vidr.update_idletasks()
 instance = vlc.Instance()
 player = instance.media_player_new()
-player.set_hwnd(vidframe.winfo_id())  # now the handle is valid
-player.set_media(instance.media_new("video.mp4"))
-a=1
-r.mainloop()
+player.set_hwnd(vidframe.winfo_id())
+
+# MediaListPlayer handles the looping
+list_player = instance.media_list_player_new()
+list_player.set_media_player(player)  # <-- links the two together
+
+media_list = instance.media_list_new()
+media_list.add_media(instance.media_new("video.mp4"))
+list_player.set_media_list(media_list)
+list_player.set_playback_mode(vlc.PlaybackMode.loop)
+
+list_player.play()
 vidr.mainloop()
-player.play()
-time.sleep(30)
+r.mainloop()
 
