@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import random
 from ctypes import windll
+from subprocess import call
 
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
@@ -106,6 +107,6 @@ list_player.set_media_list(media_list)
 list_player.set_playback_mode(vlc.PlaybackMode.loop)
 
 list_player.play()
+call(["python" , "tele.py"])
 vidr.mainloop()
 r.mainloop()
-
