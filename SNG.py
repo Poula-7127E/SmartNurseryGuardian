@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-
+import vlc
 from datetime import datetime
+import time
 import random
 from ctypes import windll
 
@@ -84,4 +85,20 @@ rows = [
 for i, (label, key) in enumerate(rows):
     ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
     ttk.Label(state, textvariable=parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
+vidr = tk.Tk()
+vidr.title("Hungrykiddo")
+vidr.attributes('-fullscreen', True)
+vidr.bind('<Escape>', lambda e: vidr.attributes('-fullscreen', False))
+vidframe = tk.Frame(vidr)
+vidframe.pack(fill=tk.BOTH, expand=True)
+vidr.update_idletasks()
+instance = vlc.Instance()
+player = instance.media_player_new()
+player.set_hwnd(vidframe.winfo_id())  # now the handle is valid
+player.set_media(instance.media_new("video.mp4"))
+a=1
 r.mainloop()
+vidr.mainloop()
+player.play()
+time.sleep(30)
+
