@@ -6,7 +6,7 @@ import time
 import random
 from ctypes import windll
 from subprocess import call
-import APMLC as comb
+import CombinedScript as cs
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
 
@@ -95,26 +95,6 @@ def make_card(parent, col, row, title, variable, subtitle):
     ttk.Label(card, textvariable=variable, style="Value.TLabel").pack(anchor='center', pady=(8, 2))
     ttk.Label(card, text=subtitle, style="Small.TLabel").pack(anchor='center')
 r.update()
-temp = 0
-#temp = int(input()) ,  a function to get the temperature from the chip , still unwritten 
-parameters["temperature"] = tk.StringVar(value=(str(temp)+".0 °C")) if (temp > 0) else parameters["temperature"] 
-mot = 0
-#mot = int(input()) , a function to get the motion each 8 seconds from the chip , still unwritten 
-parameters["motion"] = tk.StringVar(value=str(mot)) if (mot > 0) else parameters["motion"]
-li = "0"
-#li = input()       , a function to get the light intensity  from the chip , still unwritten 
-parameters["light"] = tk.StringVar(value=li) if (li != "0") else parameters["light"]
-g = "0"
-#g = input()   
-parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
-#the chip should communicate with the GUI for all that info 
-mlclass="N"
-mlclass=(comb.APMLC()).strip()
-parameters["classification"] = tk.StringVar(value=mlclass) if (mlclass != "N") else parameters["classification"]
-r.update()
-if(mlclass != "N"):
-    add_activity("Cry DETECTED !!!!!!!!")
-    parameters["cry"]=tk.StringVar(value="Cry detected")
 
 make_card(cards, 0, 0, "Temperature", parameters["temperature"], "Thermistor")
 make_card(cards, 1, 0, "Motion", parameters["motion"], "PIR / 8 sec")
@@ -137,11 +117,6 @@ for i, (label, key) in enumerate(rows):
 r.update()
 
 
-if(g!="0"):
-    save_the_baby()
-
-if(mlclass == "hungry"):
-    Hungry()
 activity=ttk.Frame(r,padding=(25,5)) 
 activity.pack(fill="x")
 ttk.Label(r, text="Log", style="Small.TLabel").pack(anchor='center')
@@ -156,5 +131,30 @@ def add_activity(message):
     recent_activity.see("end")  # automatically scroll down
     recent_activity.config(state="disabled")
 
+temp = 0
+#temp = int(input()) ,  a function to get the temperature from the chip , still unwritten 
+parameters["temperature"] = tk.StringVar(value=(str(temp)+".0 °C")) if (temp > 0) else parameters["temperature"] 
+mot = 0
+#mot = int(input()) , a function to get the motion each 8 seconds from the chip , still unwritten 
+parameters["motion"] = tk.StringVar(value=str(mot)) if (mot > 0) else parameters["motion"]
+li = "0"
+#li = input()       , a function to get the light intensity  from the chip , still unwritten 
+parameters["light"] = tk.StringVar(value=li) if (li != "0") else parameters["light"]
+g = "0"
+#g = input()   
+parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
+#the chip should communicate with the GUI for all that info 
+mlclass="N"
+mlclass=cs.AudioML().strip()
+parameters["classification"] = tk.StringVar(value=mlclass) if (mlclass != "N") else parameters["classification"]
+if(g!="0"):
+    save_the_baby()
+
+if(mlclass == "hungry"):
+    Hungry()
+
+if(mlclass != "N"):
+    add_activity("Cry DETECTED !!!!!!!!")
+    parameters["cry"]=tk.StringVar(value="Cry detected")
 
 r.mainloop()

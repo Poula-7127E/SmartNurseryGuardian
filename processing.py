@@ -7,26 +7,27 @@ import numpy as np
 import pandas as pd
 import librosa
 import time
-import SNG as gui
 
 ##############this code records short samples (each of 30 ms), and if noise is detected, 
 # it records an audio file os length 3 min, removes back-noise, and saves it and its original copy locally
 # note: that only occurs once. In other words, the whole script will need to be re-runned to check for a new 3-min recording ######################
 
 def process_and_save_audio(output_filename="after noise removal.wav", duration=60, sr=16000):
+    import SNG as gui
+
     """
     Captures mic input, removes background noise, runs VAD, 
     and saves the result to a WAV audio file on disk.
     """
     #print("\n--------------------------------------------------")
-    gui.recent_activity("Starting audio recording process...")
-    gui.recent_activity(f"Listening on microphone for {duration} seconds... Speak or play cry sound now!")
+    gui.add_activity("Starting audio recording process...")
+    gui.add_activity(f"Listening on microphone for {duration} seconds... Speak or play cry sound now!")
     
     # 1. Capture raw audio from laptop mic
     t0 = time.time()
     raw_audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
     sd.wait()  # Hardware blocking pause for audio capture
-    gui.recent_activity(f"Recording finished in {time.time() - t0:.2f}s. Audio captured into RAM.")
+    gui.add_activity(f"Recording finished in {time.time() - t0:.2f}s. Audio captured into RAM.")
 
     # Flatten audio matrix to 1D vector
     raw_audio = np.squeeze(raw_audio)
@@ -45,10 +46,10 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
     clean_audio = nr.reduce_noise(
         y=raw_audio, sr=sr, stationary=True
     )
-    gui.recent_activity(f"Noise removed successfully in {time.time() - t0:.2f}s.")
+    gui.add_activity(f"Noise removed successfully in {time.time() - t0:.2f}s.")
     
     # 3. Voice Activity Detection (VAD)
-    gui.recent_activity("Running Voice Activity Detection (WebRTC VAD)...")
+    gui.add_activity("Running Voice Activity Detection (WebRTC VAD)...")
     t0 = time.time()
     
     vad = wvad.Vad(0)
@@ -63,17 +64,17 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
     
     speech_ratio = voiced_frames / max(1, total_frames)
     is_cry_detected = speech_ratio > 0.25
-    gui.recent_activity(f"VAD analysis finished in {time.time() - t0:.3f}s. Voiced frame ratio: {speech_ratio:.1%}")
+    gui.add_activity(f"VAD analysis finished in {time.time() - t0:.3f}s. Voiced frame ratio: {speech_ratio:.1%}")
     
     # 4. Save to Audio File (.wav)
-    gui.recent_activity("Finalizing output...")
+    gui.add_activity("Finalizing output...")
     if is_cry_detected:
         #sf.write("original1.wav", raw_audio,sr)
         #sf.write("after noise removal1.wav", clean_audio, sr)
         #print(f"SUCCESS: Voice/Cry detected! Cleaned audio file saved to '{output_filename}'")
         return clean_audio
     else:
-        gui.recent_activity("NOTICE: No voice/cry detected in sample. Skipping WAV file saving.")
+        gui.add_activity("NOTICE: No voice/cry detected in sample. Skipping WAV file saving.")
         return None
 
 def is_cry_detected(duration=0.03, sr=16000):
@@ -89,18 +90,18 @@ def is_cry_detected(duration=0.03, sr=16000):
 
     return vad.is_speech(pcm_bytes, sr)
 def go(timeout_seconds=60): # Added a timeout parameter (e.g., 60 seconds)
+    import SNG as gui
     start_time = time.time()
     
     while not is_cry_detected():
         # Check if the total elapsed time has exceeded our limit
         elapsed_time = time.time() - start_time
         if elapsed_time > timeout_seconds :
-            gui.recent_activity(f"⏱️ Timeout reached ({timeout_seconds}s) with no audio detected. Exiting loop.")
+            gui.add_activity(f"⏱️ Timeout reached ({timeout_seconds}s) with no audio detected. Exiting loop.")
             return None # Return None so your pipeline knows no audio was recorded
-        gui.recent_activity("No noise detected")
+        gui.add_activity("No noise detected")
         time.sleep(0.01)
-        
-    gui.recent_activity("System initializing...")
+    gui.add_activity("System initializing...")
     file = process_and_save_audio()
-    gui.recent_activity("Pipeline execution complete!")
+    gui.add_activity("Pipeline execution complete!")
     return file
