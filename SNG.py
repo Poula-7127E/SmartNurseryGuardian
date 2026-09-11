@@ -6,10 +6,24 @@ import time
 import random
 from ctypes import windll
 from subprocess import call
-import CombinedScript as cs
+import CombinedScript as comb
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
 
+r = tk.Tk() #this is the root , probs the whole gui if you would 
+r.title("Smart Nursery Guardian") 
+r.geometry("1500x1100") #I chose those two numbers for absolutely no reason , will change them later
+r.update()
+status=ttk.Frame(r,padding=(25,5)) 
+status.pack(fill="x")
+clock = ttk.Label(status, text="")
+clock.pack(side="right", pady=(10, 0))
+
+def add_activity(message):
+    pass
+def update_clock():
+    clock.config(text=datetime.now().strftime("%Y-%m-%d  %H:%M:%S"))
+    r.after(1000, update_clock)
 def Hungry():    
     vidr = tk.Tk()
     vidr.title("Hungry_kiddo")
@@ -34,10 +48,7 @@ def Hungry():
 def save_the_baby():  #SNG: 1 , Linsey Clancy : -3
     call(["python" , "tele.py"])
 
-r = tk.Tk() #this is the root , probs the whole gui if you would 
-r.title("Smart Nursery Guardian") 
-r.geometry("1500x1100") #I chose those two numbers for absolutely no reason , will change them later
-r.update()
+update_clock()
 parameters = {"temperature": tk.StringVar(value="27.0 °C"),    
             "motion": tk.StringVar(value="0"),
             "baby_state": tk.StringVar(value="Sleeping"),
@@ -51,8 +62,6 @@ parameters = {"temperature": tk.StringVar(value="27.0 °C"),
             "last_event": tk.StringVar(value="System started"),}
 # as the name suggests , the parameters that determine the outcome
 r.update()
-status=ttk.Frame(r,padding=(25,5)) 
-status.pack(fill="x")
 style = ttk.Style()
 style.configure("Title.TLabel", font=("Segoe UI", 24, "bold"))
 style.configure("Subtitle.TLabel", font=("Segoe UI", 10))
@@ -100,10 +109,11 @@ g = "0"
 parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
 #the chip should communicate with the GUI for all that info 
 mlclass="N"
-#mlclass=(cs.AudioProc_MLClass()).strip()
+mlclass=(comb.APMLC()).strip()
 parameters["classification"] = tk.StringVar(value=mlclass) if (mlclass != "N") else parameters["classification"]
 r.update()
 if(mlclass != "N"):
+    add_activity("Cry DETECTED !!!!!!!!")
     parameters["cry"]=tk.StringVar(value="Cry detected")
 
 make_card(cards, 0, 0, "Temperature", parameters["temperature"], "Thermistor")
@@ -132,6 +142,19 @@ if(g!="0"):
 
 if(mlclass == "hungry"):
     Hungry()
+activity=ttk.Frame(r,padding=(25,5)) 
+activity.pack(fill="x")
+ttk.Label(r, text="Log", style="Small.TLabel").pack(anchor='center')
+recent_activity = tk.Text(r,height=5,width=50,state="disabled")
+recent_activity.pack()
+def add_activity(message):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    recent_activity.config(state="normal")
+
+    recent_activity.insert("end",f"[{timestamp}] {message}" + "\n")
+
+    recent_activity.see("end")  # automatically scroll down
+    recent_activity.config(state="disabled")
 
 
 r.mainloop()

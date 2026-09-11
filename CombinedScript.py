@@ -5,10 +5,10 @@ import Features2 as f
 import time
 from scipy.io.wavfile import write
 loaded_model = joblib.load('my_ml_model.joblib')
-def AudioProc_MLClass(): 
-    prediction = " "
 
-# Listen for a maximum of 5 minutes (300 seconds) before stopping automatically
+def APMLC(): 
+    prediction = " "
+    # Listen for a maximum of 5 minutes (300 seconds) before stopping automatically
     input_file = p.go(timeout_seconds=10)
 
     if input_file is None:

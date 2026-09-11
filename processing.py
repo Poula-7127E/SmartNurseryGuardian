@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import librosa
 import time
+import SNG as gui
 
 ##############this code records short samples (each of 30 ms), and if noise is detected, 
 # it records an audio file os length 3 min, removes back-noise, and saves it and its original copy locally
@@ -18,14 +19,14 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
     and saves the result to a WAV audio file on disk.
     """
     #print("\n--------------------------------------------------")
-    #print("Starting audio recording process...")
-    #print(f"Listening on microphone for {duration} seconds... Speak or play cry sound now!")
+    gui.recent_activity("Starting audio recording process...")
+    gui.recent_activity(f"Listening on microphone for {duration} seconds... Speak or play cry sound now!")
     
     # 1. Capture raw audio from laptop mic
     t0 = time.time()
     raw_audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
     sd.wait()  # Hardware blocking pause for audio capture
-    print(f"Recording finished in {time.time() - t0:.2f}s. Audio captured into RAM.")
+    gui.recent_activity(f"Recording finished in {time.time() - t0:.2f}s. Audio captured into RAM.")
 
     # Flatten audio matrix to 1D vector
     raw_audio = np.squeeze(raw_audio)
@@ -44,10 +45,10 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
     clean_audio = nr.reduce_noise(
         y=raw_audio, sr=sr, stationary=True
     )
-    #print(f"Noise removed successfully in {time.time() - t0:.2f}s.")
+    gui.recent_activity(f"Noise removed successfully in {time.time() - t0:.2f}s.")
     
     # 3. Voice Activity Detection (VAD)
-    #print("Running Voice Activity Detection (WebRTC VAD)...")
+    gui.recent_activity("Running Voice Activity Detection (WebRTC VAD)...")
     t0 = time.time()
     
     vad = wvad.Vad(0)
@@ -62,17 +63,17 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
     
     speech_ratio = voiced_frames / max(1, total_frames)
     is_cry_detected = speech_ratio > 0.25
-    #print(f"VAD analysis finished in {time.time() - t0:.3f}s. Voiced frame ratio: {speech_ratio:.1%}")
+    gui.recent_activity(f"VAD analysis finished in {time.time() - t0:.3f}s. Voiced frame ratio: {speech_ratio:.1%}")
     
     # 4. Save to Audio File (.wav)
-    #print("Finalizing output...")
+    gui.recent_activity("Finalizing output...")
     if is_cry_detected:
         #sf.write("original1.wav", raw_audio,sr)
         #sf.write("after noise removal1.wav", clean_audio, sr)
         #print(f"SUCCESS: Voice/Cry detected! Cleaned audio file saved to '{output_filename}'")
         return clean_audio
     else:
-        #print("NOTICE: No voice/cry detected in sample. Skipping WAV file saving.")
+        gui.recent_activity("NOTICE: No voice/cry detected in sample. Skipping WAV file saving.")
         return None
 
 def is_cry_detected(duration=0.03, sr=16000):
@@ -94,12 +95,12 @@ def go(timeout_seconds=60): # Added a timeout parameter (e.g., 60 seconds)
         # Check if the total elapsed time has exceeded our limit
         elapsed_time = time.time() - start_time
         if elapsed_time > timeout_seconds :
-            #print(f"⏱️ Timeout reached ({timeout_seconds}s) with no audio detected. Exiting loop.")
+            gui.recent_activity(f"⏱️ Timeout reached ({timeout_seconds}s) with no audio detected. Exiting loop.")
             return None # Return None so your pipeline knows no audio was recorded
-        #print("No noise detected")
+        gui.recent_activity("No noise detected")
         time.sleep(0.01)
         
-    #print("System initializing...")
+    gui.recent_activity("System initializing...")
     file = process_and_save_audio()
-    #print("Pipeline execution complete!")
+    gui.recent_activity("Pipeline execution complete!")
     return file
