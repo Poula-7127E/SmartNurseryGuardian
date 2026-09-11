@@ -30,5 +30,4 @@ def AudioProc_MLClass():
         prediction = loaded_model.predict(single_input)
         output_list= []
         #print(f"The model prediction for this file is: {prediction[0]}")
-        print(f"{prediction[0]}")
     return(prediction[0])

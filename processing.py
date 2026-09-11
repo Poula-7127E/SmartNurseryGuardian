@@ -22,21 +22,21 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
     #print(f"Listening on microphone for {duration} seconds... Speak or play cry sound now!")
     
     # 1. Capture raw audio from laptop mic
-    #t0 = time.time()
-    #raw_audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
-    #sd.wait()  # Hardware blocking pause for audio capture
-    #print(f"Recording finished in {time.time() - t0:.2f}s. Audio captured into RAM.")
+    t0 = time.time()
+    raw_audio = sd.rec(int(duration * sr), samplerate=sr, channels=1, dtype='float32')
+    sd.wait()  # Hardware blocking pause for audio capture
+    print(f"Recording finished in {time.time() - t0:.2f}s. Audio captured into RAM.")
 
     # Flatten audio matrix to 1D vector
-    #raw_audio = np.squeeze(raw_audio)
+    raw_audio = np.squeeze(raw_audio)
 
     ##################if you wanna upload the file instead of recording, comment the previous, and uncomment the next
-    try:
-        raw_audio, _ = librosa.load(r"C:/Users/Poula Sulieman/Downloads/project_dataset_hungry_19aae3d1-51c6-4ffb-aeb8-efb6ae7ba83e-1436861395462-1.7-m-48-hu.wav", sr=sr, mono=True)
-    except FileNotFoundError:
+    #try:
+    #    raw_audio, _ = librosa.load(r"C:/Users/Poula Sulieman/Downloads/project_dataset_hungry_19aae3d1-51c6-4ffb-aeb8-efb6ae7ba83e-1436861395462-1.7-m-48-hu.wav", sr=sr, mono=True)
+    #except FileNotFoundError:
         #print(f"ERROR: Could not find the file. Make sure it's in your project folder!")
-        return None
-    duration = len(raw_audio) / sr
+    #    return None
+    #duration = len(raw_audio) / sr
     
     # 2. Spectral Noise Reduction
     #print("Applying noise reduction filter...")
@@ -90,14 +90,14 @@ def is_cry_detected(duration=0.03, sr=16000):
 def go(timeout_seconds=60): # Added a timeout parameter (e.g., 60 seconds)
     start_time = time.time()
     
-    #while not is_cry_detected():
+    while not is_cry_detected():
         # Check if the total elapsed time has exceeded our limit
-    #    elapsed_time = time.time() - start_time
-    #    if elapsed_time > timeout_seconds :
-    #        #print(f"⏱️ Timeout reached ({timeout_seconds}s) with no audio detected. Exiting loop.")
-    #        return None # Return None so your pipeline knows no audio was recorded
-    #    #print("No noise detected")
-    #    time.sleep(0.01)
+        elapsed_time = time.time() - start_time
+        if elapsed_time > timeout_seconds :
+            #print(f"⏱️ Timeout reached ({timeout_seconds}s) with no audio detected. Exiting loop.")
+            return None # Return None so your pipeline knows no audio was recorded
+        #print("No noise detected")
+        time.sleep(0.01)
         
     #print("System initializing...")
     file = process_and_save_audio()

@@ -97,9 +97,11 @@ g = "0"
 #g = input()   
 parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
 #the chip should communicate with the GUI for all that info 
-parameters["classification"] = tk.StringVar(value=cs.AudioProc_MLClass()) if (g != "N") else parameters["classification"]
+mlclass="N"
+#mlclass=(cs.AudioProc_MLClass()).strip()
+parameters["classification"] = tk.StringVar(value=mlclass) if (mlclass != "N") else parameters["classification"]
 
-if(parameters["classification"] != "—"):
+if(str(parameters["classification"]) != "—"):
     parameters["cry"]=tk.StringVar(value="Cry detected")
 
 make_card(cards, 0, 0, "Temperature", parameters["temperature"], "Thermistor")
@@ -122,10 +124,10 @@ for i, (label, key) in enumerate(rows):
 
 
 
-if(parameters["gas"] != "Safe"):
+if(str(parameters["gas"]) != tk.StringVar(value="Safe")):
     save_the_baby()
 
-if((cs.AudioProc_MLClass()).strip() == "hungry"):
+if(mlclass == "hungry"):
     Hungry()
 
 
