@@ -6,6 +6,7 @@ import time
 import random
 from ctypes import windll
 from subprocess import call
+import CombinedScript as cs
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
 r = tk.Tk() #this is the root , probs the whole gui if you would 
@@ -71,6 +72,11 @@ g = "0"
 #g = input()   
 parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
 #the chip should communicate with the GUI for all that info 
+parameters["classification"] = tk.StringVar(value=cs.AudioProc_MLClass()) if (g != "N") else parameters["classification"]
+
+if(parameters["classification"] != "—"):
+    parameters["cry"]=tk.StringVar(value="Cry detected")
+
 make_card(cards, 0, 0, "Temperature", parameters["temperature"], "Thermistor")
 make_card(cards, 1, 0, "Motion", parameters["motion"], "PIR / 8 sec")
 make_card(cards, 0, 1, "Room Light", parameters["light"], "LDR")
@@ -87,6 +93,7 @@ rows = [
 for i, (label, key) in enumerate(rows):
     ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
     ttk.Label(state, textvariable=parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
+r.mainloop()
 # now the display is over , let's cut to action
 
 def Hungry():    
@@ -117,7 +124,6 @@ def save_the_baby():  #SNG: 1 , Linsey Clancy : -3
 if(parameters["gas"] != "Safe"):
     save_the_baby()
 
-if(parameters["classification"] != "Hungry"):
+if(parameters["classification"] == "Hungry"):
     Hungry()
 
-r.mainloop()
