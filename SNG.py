@@ -37,6 +37,7 @@ def save_the_baby():  #SNG: 1 , Linsey Clancy : -3
 r = tk.Tk() #this is the root , probs the whole gui if you would 
 r.title("Smart Nursery Guardian") 
 r.geometry("1500x1100") #I chose those two numbers for absolutely no reason , will change them later
+r.update()
 parameters = {"temperature": tk.StringVar(value="27.0 °C"),    
             "motion": tk.StringVar(value="0"),
             "baby_state": tk.StringVar(value="Sleeping"),
@@ -49,7 +50,7 @@ parameters = {"temperature": tk.StringVar(value="27.0 °C"),
             "classification": tk.StringVar(value="—"),
             "last_event": tk.StringVar(value="System started"),}
 # as the name suggests , the parameters that determine the outcome
-
+r.update()
 status=ttk.Frame(r,padding=(25,5)) 
 status.pack(fill="x")
 style = ttk.Style()
@@ -76,7 +77,7 @@ left.pack( fill="both", expand=False, padx=(0, 10))
 ttk.Label(left, text="Live Monitoring",font=("Segoe UI", 16, "bold")).pack(anchor='center', pady=(0, 10))
 cards = ttk.Frame(left)
 cards.pack(fill="x")
-
+r.update()
 def make_card(parent, col, row, title, variable, subtitle):
     card = ttk.Frame(parent, style="Card.TFrame", padding=14)
     card.grid(row=row, column=col, sticky="nsew", padx=5, pady=5)
@@ -84,6 +85,7 @@ def make_card(parent, col, row, title, variable, subtitle):
     ttk.Label(card, text=title, style="CardTitle.TLabel").pack(anchor='center')
     ttk.Label(card, textvariable=variable, style="Value.TLabel").pack(anchor='center', pady=(8, 2))
     ttk.Label(card, text=subtitle, style="Small.TLabel").pack(anchor='center')
+r.update()
 temp = 0
 #temp = int(input()) ,  a function to get the temperature from the chip , still unwritten 
 parameters["temperature"] = tk.StringVar(value=(str(temp)+".0 °C")) if (temp > 0) else parameters["temperature"] 
@@ -100,8 +102,8 @@ parameters["gas"] = tk.StringVar(value=g) if (g != "0") else parameters["gas"]
 mlclass="N"
 #mlclass=(cs.AudioProc_MLClass()).strip()
 parameters["classification"] = tk.StringVar(value=mlclass) if (mlclass != "N") else parameters["classification"]
-
-if(str(parameters["classification"]) != "—"):
+r.update()
+if(mlclass != "N"):
     parameters["cry"]=tk.StringVar(value="Cry detected")
 
 make_card(cards, 0, 0, "Temperature", parameters["temperature"], "Thermistor")
@@ -110,6 +112,7 @@ make_card(cards, 0, 1, "Room Light", parameters["light"], "LDR")
 make_card(cards, 1, 1, "Gas / Smoke", parameters["gas"], "Gas sensor")
 state = ttk.LabelFrame(left, text="System State", padding=14)
 state.pack(fill="x", pady=12)
+r.update()
 rows = [
             ("Baby state", "baby_state"),
             ("Cry detection", "cry"),
@@ -121,10 +124,10 @@ for i, (label, key) in enumerate(rows):
     ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
     ttk.Label(state, textvariable=parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
 # now the display is over , let's cut to action
+r.update()
 
 
-
-if(str(parameters["gas"]) != tk.StringVar(value="Safe")):
+if(g!="0"):
     save_the_baby()
 
 if(mlclass == "hungry"):
