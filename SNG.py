@@ -9,6 +9,31 @@ from subprocess import call
 import CombinedScript as cs
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
+
+def Hungry():    
+    vidr = tk.Tk()
+    vidr.title("Hungry_kiddo")
+    vidr.attributes('-fullscreen', True)
+    vidr.bind('<Escape>', lambda e: vidr.attributes('-fullscreen', False))
+    vidframe = tk.Frame(vidr)
+    vidframe.pack(fill=tk.BOTH, expand=True)
+    vidr.update_idletasks()
+    instance = vlc.Instance()
+    player = instance.media_player_new()
+    player.set_hwnd(vidframe.winfo_id())
+
+    list_player = instance.media_list_player_new()
+    list_player.set_media_player(player)  # <-- links the two together
+    media_list = instance.media_list_new()
+    media_list.add_media(instance.media_new("video.mp4"))
+    list_player.set_media_list(media_list)
+    list_player.set_playback_mode(vlc.PlaybackMode.loop)
+    list_player.play()
+    vidr.mainloop()
+
+def save_the_baby():  #SNG: 1 , Linsey Clancy : -3
+    call(["python" , "tele.py"])
+
 r = tk.Tk() #this is the root , probs the whole gui if you would 
 r.title("Smart Nursery Guardian") 
 r.geometry("1500x1100") #I chose those two numbers for absolutely no reason , will change them later
@@ -93,37 +118,15 @@ rows = [
 for i, (label, key) in enumerate(rows):
     ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
     ttk.Label(state, textvariable=parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
-r.mainloop()
 # now the display is over , let's cut to action
 
-def Hungry():    
-    vidr = tk.Tk()
-    vidr.title("Hungry_kiddo")
-    vidr.attributes('-fullscreen', True)
-    vidr.bind('<Escape>', lambda e: vidr.attributes('-fullscreen', False))
-    vidframe = tk.Frame(vidr)
-    vidframe.pack(fill=tk.BOTH, expand=True)
-    vidr.update_idletasks()
-    instance = vlc.Instance()
-    player = instance.media_player_new()
-    player.set_hwnd(vidframe.winfo_id())
-
-    list_player = instance.media_list_player_new()
-    list_player.set_media_player(player)  # <-- links the two together
-    media_list = instance.media_list_new()
-    media_list.add_media(instance.media_new("video.mp4"))
-    list_player.set_media_list(media_list)
-    list_player.set_playback_mode(vlc.PlaybackMode.loop)
-    list_player.play()
-    vidr.mainloop()
-
-def save_the_baby():  #SNG: 1 , Linsey Clancy : -3
-    call(["python" , "tele.py"])
 
 
 if(parameters["gas"] != "Safe"):
     save_the_baby()
 
-if(parameters["classification"] == "Hungry"):
+if((cs.AudioProc_MLClass()).strip() == "hungry"):
     Hungry()
 
+
+r.mainloop()

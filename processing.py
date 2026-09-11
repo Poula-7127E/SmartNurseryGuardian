@@ -32,7 +32,7 @@ def process_and_save_audio(output_filename="after noise removal.wav", duration=6
 
     ##################if you wanna upload the file instead of recording, comment the previous, and uncomment the next
     try:
-        raw_audio, _ = librosa.load(r"C:/Users/Poula Sulieman/Downloads/project_dataset_hungry_08E9485B-2772-444B-A636-77E14DD14A8C-1431493453-1.0-m-04-hu.wav", sr=sr, mono=True)
+        raw_audio, _ = librosa.load(r"C:/Users/Poula Sulieman/Downloads/project_dataset_hungry_19aae3d1-51c6-4ffb-aeb8-efb6ae7ba83e-1436861395462-1.7-m-48-hu.wav", sr=sr, mono=True)
     except FileNotFoundError:
         #print(f"ERROR: Could not find the file. Make sure it's in your project folder!")
         return None
