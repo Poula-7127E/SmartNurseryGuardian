@@ -6,7 +6,7 @@ import time
 import random
 from ctypes import windll
 from subprocess import call
-import CombinedScript as comb
+import APMLC as comb
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
 
