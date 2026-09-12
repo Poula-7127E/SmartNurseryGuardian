@@ -13,7 +13,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 
 #serial connection
-stm = serial.Serial("COM5", 115200,timeout=1)
+#stm = serial.Serial("COM5", 115200,timeout=1)
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
 windll.shcore.SetProcessDpiAwareness(1)
 class SNG:
@@ -25,7 +25,7 @@ class SNG:
         self.parameters = {"temperature": tk.StringVar(value="27.0 °C"),    
                       "motion": tk.StringVar(value="still"),
                       "baby_state": tk.StringVar(value="Sleeping"),
-                      "light": tk.StringVar(value="Bright"),
+                      "light": tk.StringVar(value="OFF"),
                       "gas": tk.StringVar(value="Safe"),
                       "fan": tk.StringVar(value="Half Speed"),
                       "servo": tk.StringVar(value="Stopped"),
@@ -43,7 +43,6 @@ class SNG:
         style.configure("Action.TButton", font=("Segoe UI", 10, "bold"), padding=8)
         self.builder()
         self.update_clock()
-        
         self.start_audio_thread()
     def builder(self): #a big chunk of the interface
         status=ttk.Frame(self.r,padding=(25,5)) 
@@ -61,7 +60,7 @@ class SNG:
         cards.pack(fill="x")
 
         self.make_card(cards, 0, 0, "Temperature", self.parameters["temperature"], "Thermistor")
-        self.make_card(cards, 1, 0, "Motion state", self.parameters["motion"])
+        self.make_card(cards, 1, 0, "Motion state", self.parameters["motion"],"")
         self.make_card(cards, 0, 1, "Room Light", self.parameters["light"], "LDR")
         self.make_card(cards, 1, 1, "Gas / Smoke", self.parameters["gas"], "Gas sensor")
         state = ttk.LabelFrame(left, text="System State", padding=14)
@@ -81,6 +80,14 @@ class SNG:
         ttk.Label(self.r, text="Log", style="Small.TLabel").pack(anchor='center')
         self.recent_activity = tk.Text(self.r,height=5,width=50,state="disabled")
         self.recent_activity.pack()
+        self.add_activity("Hello World!")
+    def make_card(self,parent, col, row, title, variable, subtitle):
+        card = ttk.Frame(parent, style="Card.TFrame", padding=14)
+        card.grid(row=row, column=col, sticky="nsew", padx=5, pady=5)
+        parent.columnconfigure(col, weight=1)
+        ttk.Label(card, text=title, style="CardTitle.TLabel").pack(anchor='center')
+        ttk.Label(card, textvariable=variable, style="Value.TLabel").pack(anchor='center', pady=(8, 2))
+        ttk.Label(card, text=subtitle, style="Small.TLabel").pack(anchor='center')
     def start_audio_thread(self):
         thread = threading.Thread(target=self.audio_worker,daemon=True)
         thread.start()
@@ -93,43 +100,46 @@ class SNG:
         if result != "N":
             self.parameters["classification"].set(result)
             self.parameters["cry"].set("Cry detected")
-            self.parameters["Baby state"].set("Awake")
-            stm.write("CRY_DETECTED\n".encode())
-            stm.write("SERVO_START\n".encode())
+            self.parameters["light"].set("ON") 
+            self.parameters["baby_state"].set("Awake")
+            #stm.write("CRY_DETECTED\n".encode())
+            #stm.write("SERVO_START\n".encode())
             self.add_activity("Cry DETECTED !!!!!!!!")
         if result == "hungry":
             self.Hungry()
         elif result == "tired":
             self.tired()
+        elif result == "discomfort":
+            self.discomfort()
         else:
             self.parameters["classification"].set("—")
-            stm.write("CRY_ENDED\n".encode())
-            stm.write("BUZZER_OFF\n".encode())
-            stm.write("SERVO_STOP\n".encode())
-            self.parameters["Baby state"].set("Sleeping")
+            #stm.write("CRY_ENDED\n".encode())
+            #stm.write("BUZZER_OFF\n".encode())
+            #stm.write("SERVO_STOP\n".encode())
+            self.parameters["baby_state"].set("Sleeping")
             self.parameters["cry"].set("No cry detected")
     def start_serial(self):
         thread = threading.Thread(target=self.serial_worker,daemon=True)
         thread.start()
-    def serial_worker(self):
-        if stm.in_waiting:
-            message = stm.readline().decode().strip()
-            if message.startswith("TEMP:"):
-                self.parameters["temperature"].set(str(float(message[5:])))
-                if float(message[5:]) > 30 :
-                    self.parameters["fan"].set("Full Speed")
-                elif float(message[5:]) > 25 :
-                    self.parameters["fan"].set("Half Speed")
-                else:
-                    self.parameters["fan"].set("Off")      
-            elif message == "GAS_ALERT":
-                self.parameters["gas"].set("Not Safe")
-                self.r.after(0,self.add_activity,"GAS/SMOKE DETECTED")
-                self.r.after(0,self.save_the_baby)
-            elif message == "BABY_AWAKE":
-                self.parameters["motion"].set("moving")
-            elif message == "BABY_ASLEEP":
-                            self.parameters["motion"].set("still")                                
+    #def serial_worker(self):
+    #    if stm.in_waiting:
+    #        message = stm.readline().decode().strip()
+    #      if message.startswith("TEMP:"):
+    #            self.parameters["temperature"].set(str(float(message[5:])))
+    #            if float(message[5:]) > 30 :
+    #                self.parameters["fan"].set("Full Speed")
+    #            elif float(message[5:]) > 25 :
+    #                self.parameters["fan"].set("Half Speed")
+    #            else:
+    #                self.parameters["fan"].set("Off")      
+    #        elif message == "GAS_ALERT":
+    #            self.parameters["gas"].set("Not Safe")
+    #            self.r.after(0,self.add_activity,"GAS/SMOKE DETECTED")
+#                self.r.after(0,self.save_the_baby)
+#            elif message == "BABY_AWAKE":
+#                self.parameters["motion"].set("moving")
+#            elif message == "BABY_ASLEEP":
+#                            self.parameters["motion"].set("still")                                
     def add_activity(self,message=""):
         try:
             if self.recent_activity.winfo_exists():
@@ -144,10 +154,12 @@ class SNG:
         self.clock.config(text=datetime.now().strftime("%Y-%m-%d  %H:%M:%S"))
         self.r.after(1000, self.update_clock)
     def tired(self):
-        stm.write("BUZZER_ON\n".encode())
-        messagebox.showinfo("Attention", "Your child is tired , Check on your kid")
-        pass 
+        #stm.write("BUZZER_ON\n".encode())
+        messagebox.showwarning("Attention", "Your child is tired , Check on your kid") 
+    def discomfort(self):
+        messagebox.showinfo("Attention", "Your child is feeling discomfort , I suggest you change the diaper , clothing or position of your kid")
     def Hungry(self):    
+        self.r.iconify()
         vidr = tk.Toplevel(self.r)
         vidr.title("Hungry_kiddo")
         vidr.attributes('-fullscreen', True)
@@ -170,23 +182,19 @@ class SNG:
             vidr.destroy()
 
     def save_the_baby(self):  #SNG: 1 , Linsey Clancy : -3
+        self.r.iconify()
         window = tk.Toplevel(self.r)
         window.title("Image")
-        image = Image.open("image.png")
+        window.attributes('-fullscreen', True)
+        window.bind('<Escape>', lambda e: window.attributes('-fullscreen', False))
+        image = Image.open("image.jpeg")
         image = ImageTk.PhotoImage(image)
         label = tk.Label(window, image=image)
-        label.pack()
+        label.place(relx=0.5, rely=0.5, anchor="c")
         label.image = image
-        call(["python" , "tele.py"])
+        #call(["python" , "tele.py"])
     def check_connection(self):
          pass
-    def make_card(self,parent, col, row, title, variable, subtitle):
-        card = ttk.Frame(parent, style="Card.TFrame", padding=14)
-        card.grid(row=row, column=col, sticky="nsew", padx=5, pady=5)
-        parent.columnconfigure(col, weight=1)
-        ttk.Label(card, text=title, style="CardTitle.TLabel").pack(anchor='center')
-        ttk.Label(card, textvariable=variable, style="Value.TLabel").pack(anchor='center', pady=(8, 2))
-        ttk.Label(card, text=subtitle, style="Small.TLabel").pack(anchor='center')
 #will be changed once everything is assembled
 #there should be a function that gets called here that checks if the thing is connected , if it isn't it should return 0
 # now the display is over , let's cut to action

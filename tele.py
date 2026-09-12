@@ -9,4 +9,4 @@ async def send_message(token, chat_id, text):
     # Send the message
     await application.bot.send_message(chat_id=chat_id, text=text)
 
-asyncio.run(send_message("8843566763:AAHWOXuEpcTzH6hjY9RURnJNJOGfri294QU", "5058417837", "ابنك بيتحرق"))
+asyncio.run(send_message("8843566763:AAHWOXuEpcTzH6hjY9RURnJNJOGfri294QU", "5058417837", "The Guardian has detected smoke/objectable gases in your ."))
