@@ -6,9 +6,9 @@ import time
 from scipy.io.wavfile import write
 loaded_model = joblib.load('my_ml_model.joblib')
 prediction = " "
-def AudioML(): 
+def AudioML(log_callback=None):
     # Listen for a maximum of 5 minutes (300 seconds) before stopping automatically
-    input_file = p.go(timeout_seconds=10)
+    input_file = p.go(timeout_seconds=10,log_callback=log_callback)
 
     if input_file is None:
         #print("No audio was caught during the listening period.")
