@@ -10,6 +10,8 @@ from subprocess import call
 import CombinedScript as cs
 import serial
 from PIL import Image, ImageTk
+from tkinter import messagebox
+
 #serial connection
 stm = serial.Serial("COM5", 115200,timeout=1)
 # Enable system DPI awareness (Windows 10/11) (to avoid making the GUI blurry or pixelated)
@@ -43,7 +45,7 @@ class SNG:
         self.update_clock()
         
         self.start_audio_thread()
-    def builder(self):
+    def builder(self): #a big chunk of the interface
         status=ttk.Frame(self.r,padding=(25,5)) 
         status.pack(fill="x")
         ttk.Label(status, text=" | Serial: BlackPill",style="Small.TLabel").pack(side="left")
@@ -75,7 +77,7 @@ class SNG:
             ttk.Label(state, text=label + ":", font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5,padx=70)
             ttk.Label(state, textvariable=self.parameters[key]).grid(row=i, column=1, sticky="w", padx=700, pady=5)
         activity=ttk.Frame(self.r,padding=(25,5)) 
-        activity.pack(fill="x")
+        activity.pack(fill="x") # our log 
         ttk.Label(self.r, text="Log", style="Small.TLabel").pack(anchor='center')
         self.recent_activity = tk.Text(self.r,height=5,width=50,state="disabled")
         self.recent_activity.pack()
@@ -83,10 +85,10 @@ class SNG:
         thread = threading.Thread(target=self.audio_worker,daemon=True)
         thread.start()
     def audio_worker(self):
-       # while True:                 #might crash your whole device if u use a sample audio 
-        time.sleep(5)
-        result = cs.AudioML(log_callback=self.add_activity).strip()
-        self.r.after(0,self.update_audio_result,result)
+        while True:                 #might crash your whole device if u use a sample audio 
+            time.sleep(5)
+            result = cs.AudioML(log_callback=self.add_activity).strip()
+            self.r.after(0,self.update_audio_result,result)
     def update_audio_result(self, result):
         if result != "N":
             self.parameters["classification"].set(result)
@@ -143,6 +145,7 @@ class SNG:
         self.r.after(1000, self.update_clock)
     def tired(self):
         stm.write("BUZZER_ON\n".encode())
+        messagebox.showinfo("Attention", "Your child is tired , Check on your kid")
         pass 
     def Hungry(self):    
         vidr = tk.Toplevel(self.r)
